@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Services\MapGenerator;
 
 class Character extends Model
 {
@@ -37,5 +38,14 @@ class Character extends Model
     public function map()
     {
         return $this->hasOne(Map::class);
+    }
+
+    protected static function booted()
+    {
+        static::created(function (Character $c) {
+            // Génère et persiste la map dès la création du personnage
+            $cells = MapGenerator::generate();
+            $c->map()->create(['cells' => $cells]);
+        });
     }
 }

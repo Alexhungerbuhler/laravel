@@ -7,16 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Map extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
-        'character_id',
-        'cells',
-    ];
-
-    protected $casts = [
-        'cells' => 'array',
-    ];
+    protected $fillable = ['character_id','cells'];
+    protected $casts = ['cells' => 'array'];
 
     public function character()
     {
