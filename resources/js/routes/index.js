@@ -1,40 +1,20 @@
+// resources/js/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
-import Login from '@/views/Login.vue'
-import Register from '@/views/Register.vue'
-import CreateCharacter from '@/views/CreateCharacter.vue'
-import Dashboard from '@/views/Dashboard.vue'
+import home            from '../Pages/home.vue'
+import CreateCharacter from '../Pages/createCharacter.vue'
+import Dashboard       from '../Pages/Dashboard.vue'
 
 const routes = [
-  { path: '/login', name: 'Login', component: Login },
-  { path: '/register', name: 'Register', component: Register },
-  {
-    path: '/create-character',
-    name: 'CreateCharacter',
-    component: CreateCharacter,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: Dashboard,
-    meta: { requiresAuth: true }
-  },
-  { path: '/:pathMatch(.*)*', redirect: '/login' }
+  // page d’accueil
+  { path: '/',               name: 'home',             component: home },
+  // création de perso
+  { path: '/character/create', name: 'character.create', component: CreateCharacter },
+  // dashboard – accessible une fois connecté et perso créé
+  { path: '/dashboard',name: 'dashboard', component: Dashboard, meta: { requiresAuth: true } },
+
 ]
 
-const router = createRouter({
+export default createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 })
-
-// Auth guard
-router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
-  if (to.meta.requiresAuth && !token) {
-    next({ name: 'Login' })
-  } else {
-    next()
-  }
-})
-
-export default router
