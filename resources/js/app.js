@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import App from './pages/app.vue'
 import router from './routes/index.js' // Assurez-vous que le chemin est correct
-import Dashboard from './pages/dashboard.vue'
 
 
 // si tu as besoin d'un token stocké en localStorage :

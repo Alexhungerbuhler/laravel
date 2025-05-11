@@ -1,77 +1,69 @@
 <template>
-  <div class="py-12 max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
-    <!-- Flash messages -->
-    <div
-      v-if="flash.success"
-      class="p-4 bg-green-100 text-green-800 rounded"
-    >{{ flash.success }}</div>
-    <div
-      v-if="flash.error"
-      class="p-4 bg-red-100 text-red-800 rounded"
-    >{{ flash.error }}</div>
+  <NavBar />
 
-    <!-- Si pas encore de personnage -->
-    <div
-      v-if="!character"
-      class="bg-white p-6 rounded shadow text-center"
-    >
-      <p class="mb-4">Vous n’avez pas encore de personnage.</p>
-      <a
-        :href="routes.characterCreate"
-        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-      >Créer mon personnage</a>
+  <div class="py-12 max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div v-if="!character" class="bg-white p-6 rounded shadow text-center">
+      <p class="mb-4">Vous n'avez pas encore de personnage.</p>
+      <router-link to="/character/create" class="btn-primary">Créer mon personnage</router-link>
     </div>
 
-    <!-- Sinon : dashboard classique -->
-    <div
-      v-else
-      class="bg-white p-6 rounded shadow flex flex-col lg:flex-row gap-6"
-    >
-      <!-- GAUCHE : map + actions -->
+    <div v-else class="bg-white p-6 rounded shadow flex flex-col lg:flex-row gap-6">
+      <!-- GAUCHE : Map et actions -->
       <div class="flex-1 space-y-4">
-        <h3 class="text-lg font-bold mb-2">Map 5×5</h3>
-        <div id="map-grid" class="grid grid-cols-5 gap-1">
+        <h3 class="text-center font-bold">Map 5×5</h3>
+        <div class="grid grid-cols-5 gap-1">
           <div
-            v-for="(cell, idx) in cells"
+            v-for="(cell, idx) in cellsList"
             :key="idx"
-            :class="[
-              'w-12 h-12 flex items-center justify-center border text-sm',
-              idx === currentIndex ? 'bg-yellow-200' : ''
-            ]"
+            :class="[ 'w-12 h-12 flex items-center justify-center border text-sm',
+                      idx === currentIndex ? 'bg-yellow-200' : 'bg-white']"
+            @click="tryMoveCell(idx)"
           >
-            <template v-if="idx === currentIndex">
-              🙂
-            </template>
-            <template v-else>
-              <span v-if="cell.type === 'exit'">🚩</span>
-              <span v-else-if="cell.type === 'monster'">🗡</span>
-              <span v-else-if="cell.type === 'item'">🎁</span>
-              <span v-else>–</span>
-            </template>
+            <template v-if="idx === currentIndex">🙂</template>
+            <template v-else-if="cell.type==='exit'">🚩</template>
+            <template v-else-if="cell.type==='monster'">🗡</template>
+            <template v-else-if="cell.type==='item'">🎁</template>
+            <template v-else>–</template>
           </div>
         </div>
 
-        <!-- Boutons d'action 2×2 -->
-        <div class="grid grid-cols-2 gap-2 mt-4">
-          <button class="w-full px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-            Attaquer
-          </button>
-          <button class="w-full px-3 py-2 bg-blue-400 text-white rounded hover:bg-blue-500">
-            Fuir
-          </button>
-          <button class="w-full px-3 py-2 bg-green-400 text-white rounded hover:bg-green-500">
-            Potion
-          </button>
-          <button class="w-full px-3 py-2 bg-yellow-400 rounded hover:bg-yellow-500">
-            Butin
-          </button>
+        <!-- Mouvements -->
+        <div class="grid grid-cols-3 gap-2 mt-4">
+          <div></div><button @click="move(0, -1)" class="move-btn">↑</button><div></div>
+          <button @click="move(-1, 0)" class="move-btn">←</button>
+          <div></div>
+          <button @click="move(1, 0)" class="move-btn">→</button>
+          <div></div><button @click="move(0, 1)" class="move-btn">↓</button><div></div>
+        </div>
+
+        <!-- Combat -->
+        <div v-if="inCombat" class="mt-4 p-4 bg-red-100 rounded">
+          <h4 class="font-bold mb-2">Combat contre {{ monster.name }}</h4>
+          <p><strong>Niveau :</strong> {{ monster.level }}</p>
+          <p><strong>HP :</strong> {{ monster.hp }}</p>
+          <p><strong>Attaque :</strong> {{ monster.power }}</p>
+          <button @click="attack" class="btn-red">Attaquer</button>
+          <button @click="flee" class="btn-gray ml-2">Fuir</button>
+        </div>
+
+        <!-- Loot -->
+        <div v-if="showItemPanel" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div class="bg-white p-4 rounded shadow space-y-2">
+            <h4 class="font-bold">Objet : {{ currentItem.name }}</h4>
+            <p>Type : {{ currentItem.type }}</p>
+            <div class="flex gap-2 justify-end">
+              <button @click="equipItem(currentItem)" class="btn-red">Équiper</button>
+              <button @click="discardItem()" class="btn-gray">Jeter</button>
+              <button @click="closeItemPanel" class="btn-gray">Annuler</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- DROITE : stats & déplacement -->
+      <!-- DROITE : Stats + Équipement -->
       <div class="w-full lg:w-1/3 space-y-4">
-        <h3 class="text-lg font-bold mb-2">Votre personnage</h3>
-        <ul class="space-y-1">
+        <h3 class="text-center font-bold">Votre personnage</h3>
+        <ul class="text-sm space-y-1">
           <li><strong>Nom :</strong> {{ character.name }}</li>
           <li><strong>Race :</strong> {{ character.race }}</li>
           <li><strong>Classe :</strong> {{ character.class }}</li>
@@ -82,113 +74,139 @@
           <li><strong>XP :</strong> {{ character.xp }}</li>
         </ul>
 
-        <form
-          :action="routes.characterDestroy"
-          method="POST"
-          @submit.prevent="destroyCharacter"
-        >
-          <input type="hidden" name="_token" :value="csrfToken" />
-          <input type="hidden" name="_method" value="DELETE" />
-          <button
-            type="submit"
-            class="w-full bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-          >
-            Supprimer mon personnage
-          </button>
-        </form>
+        <h4 class="mt-6 font-bold">Équipement</h4>
+        <ul class="text-sm list-disc list-inside">
+          <li v-for="item in equippedItems" :key="item.id">{{ item.name }} ({{ item.type }})</li>
+          <li v-if="equippedItems.length === 0">Aucun objet équipé</li>
+        </ul>
 
-        <!-- déplacements -->
-        <div class="grid grid-cols-3 gap-2 mt-4">
-          <div></div>
-          <button @click="move(0,-1)" class="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">↑</button>
-          <div></div>
-
-          <button @click="move(-1,0)" class="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">←</button>
-          <div></div>
-          <button @click="move(1,0)" class="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">→</button>
-
-          <div></div>
-          <button @click="move(0,1)" class="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">↓</button>
-          <div></div>
-        </div>
+        <button @click="destroyCharacter" class="btn-red-outline w-full">Supprimer le personnage</button>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import { ref, computed } from 'vue';
+<script setup>
+import NavBar from '@/components/NavBar.vue'
+import { ref, computed } from 'vue'
 
-export default {
-  name: 'Dashboard',
-  setup() {
-    // 1) Récupération du payload Blade → JS
-    const { character, map, flash } = window.APP_PAYLOAD;
-    const characterRef = ref(character);
-    const mapRef       = ref(Array.isArray(map) ? map : []);
-    const flashRef     = ref(flash || { success: null, error: null });
+const { character: initChar, map = [] } = window.APP_PAYLOAD || {}
+const character = ref({ ...initChar })
+const mapRef = ref(Array.isArray(map) ? map : [])
+const posX = ref(initChar?.x || 0)
+const posY = ref(initChar?.y || 0)
+const cellsList = computed(() => mapRef.value.flatMap(r => r))
+const currentIndex = computed(() => posY.value * 5 + posX.value)
 
-    // 2) Position courante
-    const posX = ref(characterRef.value?.x || 0);
-    const posY = ref(characterRef.value?.y || 0);
+// Combat
+const inCombat = ref(false)
+const monster = ref({})
 
-    // 3) Flatten de la map pour l'affichage
-    const cells = computed(() => {
-      if (!Array.isArray(mapRef.value)) return [];
-      return mapRef.value.flatMap(row => Array.isArray(row) ? row : []);
-    });
-    const currentIndex = computed(() => posY.value * 5 + posX.value);
+// Objet
+const showItemPanel = ref(false)
+const currentItem = ref(null)
+const equippedItems = ref([]) // Liste d'objets équipés
 
-    // 4) Routes Laravel nommées
-    const routes = {
-      characterCreate:  '/character/create',
-      characterDestroy: '/character',  // si resource('character')
-    };
-    const csrfToken = document
-      .querySelector('meta[name="csrf-token"]')
-      ?.getAttribute('content');
+function move(dx, dy) {
+  const nx = posX.value + dx
+  const ny = posY.value + dy
+  if (nx < 0 || nx > 4 || ny < 0 || ny > 4) return
+  tryMoveCell(ny * 5 + nx)
+}
 
-    // 5) Méthodes
-    const move = (dx, dy) => {
-      const nx = posX.value + dx;
-      const ny = posY.value + dy;
-      if (nx < 0 || nx > 4 || ny < 0 || ny > 4) return;
-      posX.value = nx;
-      posY.value = ny;
-      // si sortie
-      const idx = ny * 5 + nx;
-      if (cells.value[idx]?.type === 'exit') {
-        alert('🎉 Félicitations, vous avez atteint la sortie !');
-      }
-    };
+function tryMoveCell(idx) {
+  if (inCombat.value) return
+  const nx = idx % 5
+  const ny = Math.floor(idx / 5)
+  const cell = cellsList.value[idx]
 
-    const destroyCharacter = () => {
-      if (!confirm('Supprimer ce personnage ?')) return;
-      fetch(routes.characterDestroy, {
-        method: 'DELETE',
-        headers: {
-          'X-CSRF-TOKEN': csrfToken,
-          'Content-Type': 'application/json',
-        }
-      })
-      .then(r => {
-        if (r.ok) window.location.reload();
-        else throw new Error('Erreur suppression');
-      })
-      .catch(console.error);
-    };
-
-    return {
-      character:  characterRef,
-      map:        mapRef,
-      flash:      flashRef.value,
-      cells, currentIndex, move,
-      routes, csrfToken, destroyCharacter
-    };
+  if (cell.type === 'monster') {
+    monster.value = { ...cell.data, hp: cell.data.hp }
+    inCombat.value = true
+    return
   }
-};
+
+  if (cell.type === 'item') {
+    currentItem.value = cell.data
+    showItemPanel.value = true
+    return
+  }
+
+  posX.value = nx
+  posY.value = ny
+}
+
+function attack() {
+  monster.value.hp -= character.value.power
+  if (monster.value.hp <= 0) {
+    inCombat.value = false
+    removeCurrentCellContent()
+    return
+  }
+  character.value.hp -= monster.value.power
+  if (character.value.hp <= 0) destroyCharacter()
+}
+
+function flee() {
+  inCombat.value = false
+}
+
+function destroyCharacter() {
+  fetch('/character', {
+    method: 'DELETE',
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+      Accept: 'application/json'
+    },
+    credentials: 'same-origin'
+  }).then(res => {
+    if (res.ok) {
+      character.value = null
+    } else {
+      window.location.href = '/dashboard'    
+
+    }
+  })
+}
+
+function removeCurrentCellContent() {
+  const idx = currentIndex.value
+  const row = Math.floor(idx / 5)
+  const col = idx % 5
+  mapRef.value[row][col] = { type: 'empty', data: null }
+}
+
+function equipItem(item) {
+  equippedItems.value.push(item)
+  removeCurrentCellContent()
+  closeItemPanel()
+}
+
+function discardItem() {
+  removeCurrentCellContent()
+  closeItemPanel()
+}
+
+function closeItemPanel() {
+  showItemPanel.value = false
+  currentItem.value = null
+}
 </script>
 
 <style scoped>
-
+.btn-primary {
+  @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600;
+}
+.btn-red {
+  @apply bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600;
+}
+.btn-gray {
+  @apply bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400;
+}
+.btn-red-outline {
+  @apply border border-red-500 text-red-500 px-4 py-2 rounded hover:bg-red-50;
+}
+.move-btn {
+  @apply px-3 py-2 bg-gray-200 rounded hover:bg-gray-300 text-lg font-bold;
+}
 </style>

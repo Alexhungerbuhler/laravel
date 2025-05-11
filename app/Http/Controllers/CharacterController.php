@@ -29,18 +29,21 @@ class CharacterController extends Controller
             'race'=>'humain',
             'class'=>'guerrier',
             'level'=>1,'xp'=>0,
-            'hp'=>20,'max_hp'=>20,'armor'=>0,'power'=>8,
+            'hp'=>20,'max_hp'=>20,'armor'=>0,'power'=>50,
             'x'=>0,'y'=>0,'equipped_items'=>null
         ]);
 
         return redirect()->route('dashboard');
     }
 
-    // Affiche dashboard (avec perso + map)
-    public function dashboard(Request $r)
+    public function dashboard(Request $request)
     {
-        $character = $r->user()->character()->with('map')->first();
-        return view('dashboard', compact('character'));
+        $character = $request->user()->character()->with('map')->first(); // Récupérer le personnage
+        return view('dashboard', [
+            'character' => $character,
+            'map' => $character->map, // Si vous avez besoin de la carte
+            'flash' => session('flash') // Si vous avez des messages flash
+        ]);
     }
 
     // Supprime le personnage et la map (cascade)

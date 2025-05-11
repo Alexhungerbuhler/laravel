@@ -1,93 +1,96 @@
-<!-- resources/js/Pages/Home.vue -->
 <template>
-    <div class="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900">
-      <!-- Header -->
-      <header class="flex justify-end p-4">
-    <nav class="space-x-4">
-      <a href="/login"    class="text-blue-600 hover:underline">Login</a>
-      <a href="/register" class="text-blue-600 hover:underline">Register</a>
-    </nav>
-  </header>
+    <NavBar />
   
-      <!-- Contenu principal -->
-      <main class="flex-grow flex flex-col items-center justify-center text-center px-4">
-        <h1 class="title">
-          Bienvenue dans Woow Game !
-        </h1>
-        <p class="description">
-          Incarnez un vaillant guerrier humain, explorez une carte mystérieuse de 5×5 cases,
-          affrontez des monstres, collectez des objets et atteignez la sortie !  
-          Prêt à relever le défi ?
-        </p>
-        <a href="/login" class="main-button">
-          Commencer l'aventure
-        </a>
-      </main>
+    <div class="text-center py-4">
+      <h1 class="text-4xl font-bold mb-4">Bienvenue dans WooW !</h1>
+      <p class="mb-8 text-lg text-gray-600 max-w-xl mx-auto">
+        Incarnez un héros sur une carte 5×5, combattez, lootez, survivez !
+      </p>
   
-      <!-- Footer facultatif -->
-      <footer class="w-full max-w-md px-6 py-4 text-center text-sm text-gray-500">
-        &copy; 2025 Woow Game
-      </footer>
+      <div class="space-x-4">
+        <a href="/login" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">Login</a>
+        <a href="/register" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">Register</a>
+      </div>
     </div>
   </template>
   
   <script setup>
-  // On peut déterminer le statut d'authentification
-  // via une prop, un store ou simplement laisser Laravel
-  // injecter window.Laravel.authenticated si tu le souhaites.
-  import { ref, onMounted } from 'vue';
+  import NavBar from '@/components/NavBar.vue'
   
-  const isAuthenticated = ref(false);
-  
-  onMounted(() => {
-    // Exemple basique : si Laravel met un flag JS
-    // window.Laravel.userId, ou via un cookie JWT
-    if (window.Laravel?.userId) {
-      isAuthenticated.value = true;
-    }
-  });
   </script>
   
-  <style scoped>
-  
-  /* Ajustements CSS pour le style */
-  .nav-link {
-    color: #1d4ed8;
-    text-decoration: none;
-    padding: 0.5rem 1rem;
-    border-radius: 0.375rem;
-    transition: background-color 0.3s;
-  }
-  
-  .nav-link:hover {
-    background-color: #e0f2fe;
-  }
-  
-  .title {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #1f2937;
-    margin-bottom: 1.5rem;
-  }
-  
-  .description {
-    font-size: 1.125rem;
-    color: #4b5563;
-    max-width: 600px;
-    margin-bottom: 2rem;
-  }
-  
-  .main-button {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background-color: #2563eb;
-    color: white;
-    border-radius: 0.5rem;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
-  }
-  
-  .main-button:hover {
-    background-color: #1e40af;
-  }
-  </style>
+<style scoped>
+/* Container centré verticalement et horizontalement */
+.py-16 {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center; /* Centre le texte */
+}
+
+/* Titre principal */
+h1 {
+  font-size: 2.5rem; /* 4xl */
+  font-weight: 700;
+  color: #1e3a8a; /* indigo-800 */
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+  text-align: center; /* Centre le texte */
+}
+
+/* Paragraphe descriptif */
+p {
+  font-size: 1.125rem; /* lg */
+  color: #4b5563; /* gray-600 */
+  line-height: 1.6;
+  text-align: center; /* Centre le texte */
+}
+
+/* Boutons */
+a,
+.router-link-active {
+  display: inline-block;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center; /* Centre le texte */
+}
+
+a.bg-blue-500 {
+  background: #3b82f6;
+  color: #ffffff;
+}
+a.bg-blue-500:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+a.bg-green-500 {
+  background: #10b981;
+  color: #ffffff;
+}
+a.bg-green-500:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+/* Limite la largeur du paragraphe et centre */
+.max-w-xl {
+  max-width: 36rem; /* ~576px */
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center; /* Centre le texte */
+}
+
+/* Texte gris pour le paragraphe */
+.text-gray-600 {
+  color: #4b5563;
+}
+</style>

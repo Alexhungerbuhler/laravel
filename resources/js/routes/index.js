@@ -1,20 +1,34 @@
-// resources/js/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
-import home            from '../Pages/home.vue'
-import CreateCharacter from '../Pages/createCharacter.vue'
-import Dashboard       from '../Pages/Dashboard.vue'
+
+// Vos pages Vue
+import Home            from '@/pages/home.vue'
+import Dashboard       from '@/pages/dashboard.vue'
+import CreateCharacter from '@/pages/createCharacter.vue'
+
 
 const routes = [
-  // page d’accueil
-  { path: '/',               name: 'home',             component: home },
-  // création de perso
-  { path: '/character/create', name: 'character.create', component: CreateCharacter },
-  // dashboard – accessible une fois connecté et perso créé
-  { path: '/dashboard',name: 'dashboard', component: Dashboard, meta: { requiresAuth: true } },
+  { path: '/',               name: 'home',             component: Home },
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: Dashboard,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/character/create',
+    name: 'create-character',
+    component: CreateCharacter,
+    meta: { requiresAuth: true }
+  },
+  { path: '/:pathMatch(.*)*', redirect: '/' }
 
 ]
 
-export default createRouter({
+const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes
 })
+
+// Petite garde pour protéger les routes “requiresAut
+
+export default router

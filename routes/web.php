@@ -1,45 +1,52 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\http\Controllers\CharacterController;
+use Illuminate\Http\Request;
+use App\Http\Controllers\CharacterController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+
+//  Page d'accueil (Vue SPA injectée dans app.blade.php)
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return view('app');
+})->name('home');
+
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('logout');
+
+//  Auth Breeze (login/register/profile)
+require __DIR__.'/auth.php';
 
 
+
+//  Routes protégées (si connecté)
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    //  Création personnage uniquement si non existant
+    Route::get('/character/create', function (Request $req) {
+        if ($req->user()->character) {
+            return redirect()->route('dashboard');
+        }
+        return view('app');
+    })->name('character.create');
+
+
+    //  Dashboard uniquement si personnage existant
+    Route::get('/dashboard', function (Request $req) {
+        if (! $req->user()->character) {
+            return redirect()->route('character.create');
+        }
+        return view('app');
+    })->name('dashboard');
+
+    Route::post('/character', [CharacterController::class, 'store']);
+    Route::delete('/character', [CharacterController::class, 'destroy']);
 });
 
-    // Routes d’authentification Breeze
-    require __DIR__ . '/auth.php';
-    
-    // Point d’entrée Vue pour la page d’accueil (Home.vue)
-    Route::view('/', 'app')->name('home');
-    
-    Route::middleware('auth')->group(function () {
-        Route::view('/character/create', 'app')->name('character.create');
-        Route::view('/dashboard', 'dashboard')->name('dashboard');
-    });
-    
-
-
-    Route::middleware('auth')->group(function () {
-        // Formulaire de création
-        Route::get('/character/create', [CharacterController::class,'create'])
-             ->name('character.create');
-        Route::post('/character',        [CharacterController::class,'store'])
-             ->name('character.store');
-    
-        // Dashboard
-        Route::get('/dashboard',         [CharacterController::class,'dashboard'])
-            ->name('dashboard');
-    
-        // (eventuellement) suppression…
-        Route::delete('/character',      [CharacterController::class,'destroy'])
-             ->name('character.destroy');
-    });
-
-    
-
-    
+// Toutes les autres routes Vue (SPA)
+Route::get('/{any}', function () {
+    return view('app');
+})->where('any', '.*')->middleware(['web']);
