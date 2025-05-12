@@ -51,7 +51,7 @@ class CharacterController extends Controller
     {
         $c = $r->user()->character;
         if ($c) { $c->delete(); }
-        return redirect()->route('dashboard')
-                         ->with('success','Personnage supprimé');
+
+        return redirect()->route('dashboard');
     }
 }

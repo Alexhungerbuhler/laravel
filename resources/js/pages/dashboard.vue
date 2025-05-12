@@ -10,7 +10,7 @@
     <div v-else class="bg-white p-6 rounded shadow flex flex-col lg:flex-row gap-6">
       <!-- GAUCHE : Map -->
       <div class="flex-1 space-y-4">
-        <h3 class="text-center font-bold">Map 5×5</h3>
+        <h3 class="text-center font-bold">Donjon du Valhallah</h3>
         <div class="grid grid-cols-5 gap-1">
           <div
             v-for="(cell, idx) in cellsList"
@@ -19,10 +19,14 @@
                      idx === currentIndex ? 'bg-yellow-200' : 'bg-white']"
             @click="tryMoveCell(idx)">
             <template v-if="idx === currentIndex">🙂</template>
-            <template v-else-if="cell.type==='exit'">🚩</template>
-            <template v-else-if="cell.type==='monster'">🗡</template>
-            <template v-else-if="cell.type==='item'">🎁</template>
-            <template v-else>–</template>
+            <tempalte v-if="cell.type === 'exit'">🚩</tempalte>
+            <template v-else-if="mapRevealed || revealCell(idx)">
+              <span v-if="cell.type === 'exit'">🚩</span>
+              <span v-else-if="cell.type === 'monster'">🗡</span>
+              <span v-else-if="cell.type === 'item'">🎁</span>
+              <span v-else></span>
+            </template>
+            <template v-else></template>
           </div>
         </div>
 
@@ -47,6 +51,15 @@
           <p><strong>Attaque :</strong> {{ monster.power }}</p>
           <button @click="attack" class="btn-red">Attaquer</button>
           <button @click="flee" class="btn-gray ml-2">Fuir</button>
+        </div>
+
+        <!-- Victoire -->
+        <div v-if="hasWon" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white p-6 rounded shadow text-center space-y-4 max-w-sm w-full">
+            <h2 class="text-xl font-bold">🎉 Victoire !</h2>
+            <p>Vous avez atteint la sortie. Félicitations !</p>
+            <a href="/character/delete" class="btn-red">Recommencer une partie</a>
+          </div>
         </div>
 
         <!-- Loot -->
@@ -78,21 +91,25 @@
         <div>
           <h4 class="mt-4 font-semibold text-sm">Équipement :</h4>
           <ul class="list-disc list-inside text-xs" v-if="equipped.length">
-            <li v-for="item in equipped" :key="item.id">{{ item.name }} ({{ item.type }} + {{ item.armor }} {{ item.power }} {{ item.hp }})</li>
+            <li v-for="item in equipped" :key="item.id">{{ item.name }} ({{ item.type }} + {{ item.armor }} {{ item.power }} {{ item.hp }} {{ item.hp_max }})</li>
           </ul>
           <p v-else class="text-xs text-gray-500">Aucun objet équipé</p>
         </div>
 
-        <button @click="destroyCharacter" class="btn-red-outline w-full">
+        <button>
+        <a href="/character/delete" class="btn-red-outline w-full">
           Supprimer mon personnage
-        </button>
+        </a>
+      </button>
       </div>
     </div>
   </div>
 </template>
 
+
+
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import NavBar from '@/components/NavBar.vue'
 
 // Payload Blade
@@ -111,19 +128,50 @@ const currentItem = ref(null)
 
 const cellsList = computed(() => mapRef.value.flatMap(row => row))
 const currentIndex = computed(() => posY.value * 5 + posX.value)
+const destination = {row: 0, col: 0};
+
+const mapRevealed = ref(false)
+
+const hasWon = ref(false)
+
+
 
 function move(dx, dy) {
   const nx = posX.value + dx
   const ny = posY.value + dy
+  
   if (nx < 0 || nx > 4 || ny < 0 || ny > 4) return
+  destination.row = nx;
+  destination.col = ny;
   tryMoveCell(ny * 5 + nx)
 }
 
+function revealCell(idx) {
+  return idx === currentIndex.value
+}
+
+function handleKeydown(e) {
+  if (e.key === 'ArrowUp') move(0, -1)
+  if (e.key === 'ArrowDown') move(0, 1)
+  if (e.key === 'ArrowLeft') move(-1, 0)
+  if (e.key === 'ArrowRight') move(1, 0)
+}
+
+onMounted(() => window.addEventListener('keydown', handleKeydown))
+onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
+
 function tryMoveCell(idx) {
-  if (inCombat.value) return
+  if (inCombat.value || hasWon.value) return
+
   const nx = idx % 5
   const ny = Math.floor(idx / 5)
   const cell = cellsList.value[idx]
+
+  // Révélation de la carte si on atteint la sortie
+  if (cell.type === 'exit') {
+    mapRevealed.value = true
+    hasWon.value = true
+  }
 
   if (cell.type === 'monster') {
     monster.value = { ...cell.data, hp: cell.data.hp }
@@ -164,15 +212,23 @@ function attack() {
   character.value.hp -= effectiveDamage
 
   if (character.value.hp <= 0) {
-    destroyCharacter()
-    window.location.href = '/character/create'    
+    window.location.href = '/character/delete'
   } 
 }
 
 function equipItem(item) {
-  if (item.hp) character.value.hp += item.hp
+  if (item.hp_max) {
+    character.value.max_hp += item.hp_max
+  }
+
+  if (item.hp) {
+    character.value.hp += item.hp
+    character.value.hp = Math.min(character.value.hp, character.value.max_hp)
+  }
+
   if (item.power) character.value.power += item.power
   if (item.armor) character.value.armor += item.armor
+
   equipped.value.push(item)
   removeCurrentCell()
   closeItemPanel()
@@ -189,31 +245,14 @@ function closeItemPanel() {
 }
 
 function removeCurrentCell() {
-  const row = Math.floor(currentIndex.value / 5)
-  const col = currentIndex.value % 5
-  mapRef.value[row][col] = { type: 'empty', data: null }
+  mapRef.value[destination.col][destination.row] = { type: 'empty', data: null }
 }
 
 function flee() {
   inCombat.value = false
 }
 
-function destroyCharacter() {
-  fetch('/character', {
-    method: 'DELETE',
-    headers: {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-      Accept: 'application/json'
-    },
-    credentials: 'same-origin'
-  }).then(res => {
-    if (res.ok) {
-      character.value = null
-    } else {
-      throw new Error('Suppression échouée')
-    }
-  }).catch(err => alert(err.message))
-}
+
 </script>
 
 <style scoped>
