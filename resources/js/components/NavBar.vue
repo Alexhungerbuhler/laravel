@@ -15,6 +15,8 @@
             {{ user.name }} ⌄
           </button>
           <div v-if="dropdownOpen" class="dropdown-menu">
+            <!-- bug de la page profile-->
+            <!--<a href="/profile" class="dropdown-item">Profil</a>-->
             <button @click="logout" class="dropdown-item text-red-500">Logout</button>
           </div>
         </template>

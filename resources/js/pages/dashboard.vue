@@ -54,11 +54,11 @@
         </div>
 
         <!-- Victoire -->
-        <div v-if="hasWon" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="bg-white p-6 rounded shadow text-center space-y-4 max-w-sm w-full">
+        <div v-if="hasWon" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div class="bg-white p-4 rounded shadow space-y-2">
             <h2 class="text-xl font-bold">🎉 Victoire !</h2>
             <p>Vous avez atteint la sortie. Félicitations !</p>
-            <a href="/character/delete" class="btn-red">Recommencer une partie</a>
+            <button @click="destroyCharacter" class="btn-red-outline w-full">Recommencer l'aventure</button>
           </div>
         </div>
 
@@ -67,6 +67,12 @@
           <div class="bg-white p-4 rounded shadow space-y-2">
             <h4 class="font-bold">Objet : {{ currentItem.name }}</h4>
             <p>Type : {{ currentItem.type }}</p>
+            <ul>
+              <li v-if="currentItem.hp">Bonus : + {{ currentItem.hp }} HP</li>
+              <li v-if="currentItem.armor">Bonus : + {{ currentItem.armor }} Armure</li>
+              <li v-if="currentItem.power">Bonus : + {{ currentItem.power }} Puissance</li>
+              <li v-if="currentItem.hp_max">Bonus : + {{ currentItem.hp_max }} HP max</li>
+            </ul>
             <div class="flex gap-2 justify-end">
               <button @click="equipItem(currentItem)" class="btn-red">Équiper</button>
               <button @click="discardItem()" class="btn-gray">Jeter</button>
@@ -96,11 +102,11 @@
           <p v-else class="text-xs text-gray-500">Aucun objet équipé</p>
         </div>
 
-        <button>
-        <a href="/character/delete" class="btn-red-outline w-full">
+       
+        <button @click="destroyCharacter" class="btn-red-outline w-full">
           Supprimer mon personnage
-        </a>
-      </button>
+        </button>
+      
       </div>
     </div>
   </div>
@@ -212,7 +218,9 @@ function attack() {
   character.value.hp -= effectiveDamage
 
   if (character.value.hp <= 0) {
-    window.location.href = '/character/delete'
+    //window.location.href = '/delete'
+    destroyCharacter();
+    window.location.href = '/dashboard'    
   } 
 }
 
@@ -252,6 +260,25 @@ function flee() {
   inCombat.value = false
 }
 
+//je n'arrive pas a supprimer le personnage avec <a href="/character/delete" /a> 
+// qui normalement fonctionne 
+function destroyCharacter() {
+  fetch('/character', {
+    method: 'DELETE',
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+      Accept: 'application/json'
+    },
+    credentials: 'same-origin'
+  }).then(res => {
+    if (res.ok) {
+      character.value = null
+    } else {
+      window.location.href = '/dashboard'
+      throw new Error('YOU DIED !')
+    }
+  }).catch(err => alert(err.message))
+}
 
 </script>
 

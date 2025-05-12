@@ -5,7 +5,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\CharacterController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
-//  Page d'accueil (Vue SPA injectée dans app.blade.php)
+//  Page d'accueil 
 Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('dashboard');

@@ -4,12 +4,14 @@
     <div class="text-center py-4">
       <h1 class="text-4xl font-bold mb-4">Bienvenue dans WooW !</h1>
       <p class="mb-8 text-lg text-gray-600 max-w-xl mx-auto">
-        Incarnez un héros sur une carte 5×5, combattez, lootez, survivez !
+        WooW est un jeu web solo de type RPG développé avec Laravel (backend)
+         et Vue 3 + Vite (frontend). Le joueur incarne un héros humain qui
+          explore un donjon 5x5, affronte des monstres, récupère des objets
+           et tente de rejoindre la sortie sans mourir.
       </p>
   
       <div class="space-x-4">
-        <a href="/login" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">Login</a>
-        <a href="/register" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">Register</a>
+        <a href="/dashboard" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">Commencer l'aventure</a>
       </div>
     </div>
   </template>
