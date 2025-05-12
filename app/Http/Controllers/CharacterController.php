@@ -29,7 +29,7 @@ class CharacterController extends Controller
             'race'=>'humain',
             'class'=>'guerrier',
             'level'=>1,'xp'=>0,
-            'hp'=>20,'max_hp'=>20,'armor'=>0,'power'=>50,
+            'hp'=>20,'max_hp'=>20,'armor'=>0,'power'=>8,
             'x'=>0,'y'=>0,'equipped_items'=>null
         ]);
 
