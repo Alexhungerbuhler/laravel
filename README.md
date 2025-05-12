@@ -24,8 +24,9 @@ WooW est un jeu web solo de type RPG développé avec **Laravel** (backend) et *
 ### 1. Cloner le projet
 
 ```bash
-git clone https://github.com/ton-utilisateur/woow-rpg.git
-cd woow-rpg
+[git clone https://github.com/ton-utilisateur/laravel.git
+](https://github.com/Alexhungerbuhler/laravel.git)
+cd Woow/laravel
 ```
 
 ### 2. Installer les dépendances PHP et JS
@@ -41,7 +42,6 @@ Copiez le fichier `.env` et configurez :
 
 ```bash
 cp .env.example .env
-php artisan key:generate
 ```
 
 ### 4. Migrer la base de données
@@ -61,26 +61,13 @@ npm run dev
 ## 🚀 Lancer l'application
 
 ```bash
-php artisan serve
+composer run dev
 ```
 
 Ouvrez [http://127.0.0.1:8000](http://127.0.0.1:8000) dans votre navigateur.
 
 ---
 
-## 📁 Structure
-
-| Dossier / Fichier             | Rôle                                              |
-|------------------------------|---------------------------------------------------|
-| `resources/js/pages/`        | Pages Vue (`home.vue`, `dashboard.vue`, etc.)    |
-| `resources/js/components/`   | Composants Vue (`NavBar.vue`, etc.)              |
-| `resources/views/app.blade.php` | Entrée unique SPA et injection des données     |
-| `app/Http/Controllers/`      | Contrôleurs Laravel                              |
-| `routes/web.php`             | Routes Laravel (auth, SPA, dashboard...)         |
-| `public/json/items.json`     | Liste d’objets lootables                         |
-| `public/json/monsters.json`  | Liste de monstres                                |
-
----
 
 ## 📦 Technologies
 
