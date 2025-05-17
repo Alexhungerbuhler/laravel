@@ -1,7 +1,7 @@
 <template>
   <NavBar />
 
-  <div class="max-w-sm mx-auto mt-4 p-6 bg-white rounded-lg shadow">
+  <div class="py-12 max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
     <h2 class="text-xl font-semibold mb-4 text-center">Créer votre personnage</h2>
     <form @submit.prevent="submit">
       <!-- Nom -->
@@ -102,6 +102,7 @@ async function submit() {
 div.max-w-sm {
   margin-top: 4rem;
 }
+
 
 /* Bouton animé */
 button {

@@ -118,6 +118,29 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import NavBar from '@/components/NavBar.vue'
 
+function saveGame() {
+  localStorage.setItem('game', JSON.stringify({
+    character: character.value,
+    map: mapRef.value,
+    x: posX.value,
+    y: posY.value,
+    equipped: equipped.value,
+    mapRevealed: mapRevealed.value
+  }))
+}
+
+function loadGame() {
+  const saved = JSON.parse(localStorage.getItem('game'))
+  if (!saved) return
+
+  character.value = saved.character || character.value
+  mapRef.value = saved.map || mapRef.value
+  posX.value = saved.x ?? posX.value
+  posY.value = saved.y ?? posY.value
+  equipped.value = saved.equipped || []
+  mapRevealed.value = saved.mapRevealed || false
+}
+
 // Payload Blade
 const { character: initChar, map = [] } = window.APP_PAYLOAD || {}
 const character = ref({ ...initChar })
@@ -150,6 +173,7 @@ function move(dx, dy) {
   destination.row = nx;
   destination.col = ny;
   tryMoveCell(ny * 5 + nx)
+  saveGame()
 }
 
 function revealCell(idx) {
@@ -163,7 +187,10 @@ function handleKeydown(e) {
   if (e.key === 'ArrowRight') move(1, 0)
 }
 
-onMounted(() => window.addEventListener('keydown', handleKeydown))
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+  loadGame()
+})
 onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
 
 function tryMoveCell(idx) {
@@ -222,6 +249,7 @@ function attack() {
     destroyCharacter();
     window.location.href = '/dashboard'    
   } 
+  saveGame()
 }
 
 function equipItem(item) {
@@ -240,11 +268,13 @@ function equipItem(item) {
   equipped.value.push(item)
   removeCurrentCell()
   closeItemPanel()
+  saveGame()
 }
 
 function discardItem() {
   removeCurrentCell()
   closeItemPanel()
+  saveGame()
 }
 
 function closeItemPanel() {
@@ -258,6 +288,7 @@ function removeCurrentCell() {
 
 function flee() {
   inCombat.value = false
+  saveGame()
 }
 
 //je n'arrive pas a supprimer le personnage avec <a href="/character/delete" /a> 

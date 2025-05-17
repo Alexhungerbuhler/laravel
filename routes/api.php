@@ -19,7 +19,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/restart', [GameController::class,'restart']);
 });
 
-// routes/api.php
 use Illuminate\Http\Request;
 
 
