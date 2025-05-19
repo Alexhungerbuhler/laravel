@@ -17,7 +17,7 @@
             :key="idx"
             :class="['w-12 h-12 flex items-center justify-center border text-sm transition',
                      idx === currentIndex ? 'bg-yellow-200' : 'bg-white']"
-            @click="tryMoveCell(idx)">
+                     >
             <template v-if="idx === currentIndex">🙂</template>
             <tempalte v-if="cell.type === 'exit'">🚩</tempalte>
             <template v-else-if="mapRevealed || revealCell(idx)">
@@ -82,6 +82,9 @@
         </div>
       </div>
 
+
+      <hero />
+
       <!-- DROITE : Stats -->
       <div class="w-full lg:w-1/3 space-y-4">
         <h3 class="text-center font-bold">Votre personnage</h3>
@@ -102,17 +105,13 @@
           <p v-else class="text-xs text-gray-500">Aucun objet équipé</p>
         </div>
 
-       
         <button @click="destroyCharacter" class="btn-red-outline w-full">
           Supprimer mon personnage
         </button>
-      
       </div>
     </div>
   </div>
 </template>
-
-
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
@@ -141,6 +140,10 @@ function loadGame() {
   mapRevealed.value = saved.mapRevealed || false
 }
 
+function clearSave() {
+  localStorage.removeItem('game')
+}
+
 // Payload Blade
 const { character: initChar, map = [] } = window.APP_PAYLOAD || {}
 const character = ref({ ...initChar })
@@ -162,8 +165,6 @@ const destination = {row: 0, col: 0};
 const mapRevealed = ref(false)
 
 const hasWon = ref(false)
-
-
 
 function move(dx, dy) {
   const nx = posX.value + dx
@@ -204,6 +205,7 @@ function tryMoveCell(idx) {
   if (cell.type === 'exit') {
     mapRevealed.value = true
     hasWon.value = true
+    clearSave()
   }
 
   if (cell.type === 'monster') {
@@ -230,8 +232,6 @@ function attack() {
     posX.value = currentIndex.value % 5
     posY.value = Math.floor(currentIndex.value / 5)
 
-
-
     if (monster.value.drops?.length) {
       const item = monster.value.drops[0]  // simple : 1 drop
       currentItem.value = item
@@ -247,6 +247,7 @@ function attack() {
   if (character.value.hp <= 0) {
     //window.location.href = '/delete'
     destroyCharacter();
+    clearSave()
     window.location.href = '/dashboard'    
   } 
   saveGame()
@@ -305,6 +306,7 @@ function destroyCharacter() {
     if (res.ok) {
       character.value = null
     } else {
+      clearSave()
       window.location.href = '/dashboard'
       throw new Error('YOU DIED !')
     }
@@ -314,6 +316,11 @@ function destroyCharacter() {
 </script>
 
 <style scoped>
+
+.cell {
+  pointer-events: none;
+}
+
 .btn-primary {
   @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600;
 }

@@ -22,10 +22,10 @@ class MapGenerator
             $row = [];
             for ($x = 0; $x < 5; $x++) {
                 $r = rand(1, 100);
-                if ($r <= 40 && count($monsters) > 0) {
+                if ($r <= 50 && count($monsters) > 0) {
                     $m = $monsters[array_rand($monsters)];
                     $row[] = ['type'=>'monster','data'=>$m];
-                } elseif ($r <= 60 && count($items) > 0) {
+                } elseif ($r <= 50 && count($items) > 0) {
                     $i = $items[array_rand($items)];
                     $row[] = ['type'=>'item','data'=>$i];
                 } else {

@@ -39,12 +39,14 @@
         />
       </div>
 
-      <button
-        type="submit"
-        class="w-full bg-indigo-600 text-black py-2 rounded-lg font-medium hover:bg-indigo-700 transition"
-      >
-        Créer le personnage
-      </button>
+      <div class="text-center mt-4"> <!-- Ajout d'un espace supplémentaire entre le formulaire et le bouton -->
+        <button
+          type="submit"
+          class="w-3 bg-indigo-600 px-3 py-2 text-black py-2 rounded-lg font-medium hover:bg-indigo-700 transition mx-auto"
+        >
+          Créer le personnage
+        </button>
+      </div>
     </form>
   </div>
 </template>
@@ -96,17 +98,17 @@ async function submit() {
   }
 }
 </script>
-
 <style scoped>
-/* Centrage vertical pour que le form ne colle pas en haut */
+/* Centrage vertical et horizontal pour que le formulaire ne colle pas en haut et soit centré */
 div.max-w-sm {
   margin-top: 4rem;
+  display: flex;
+  justify-content: center;
 }
 
-
-/* Bouton animé */
 button {
   transition: background-color 0.2s, transform 0.1s;
+  border: 1px solid #000; 
 }
 button:hover {
   transform: translateY(-1px);
